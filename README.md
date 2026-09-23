@@ -27,9 +27,9 @@ See the [Sample](./Sample/main.bicep) folder for an example Bicep template.
 - .NET 9 SDK
 - Bicep CLI v0.37.4+ (for `local-deploy`)
 
-## How to use it locally or via an Azure Container Registry (ACR)
+## How to use it locally or via GitHub Container Registry (GHCR)
 
-Here are the steps to run it either locally or using an ACR.
+Here are the steps to run it either locally or using GHCR. Publishing to any OCI registry other than ACR (such as GHCR) requires Bicep's `ociEnabled` experimental feature; see [Bicep's OCI registries documentation](https://github.com/Azure/bicep/blob/main/docs/experimental/oci-registries.md).
 
 ### Local build
 
@@ -55,33 +55,34 @@ This creates the binary that contains the Azure DevOps API calls. Prepare your `
 
 Run `bicep local-deploy main.bicepparam` to test the extension locally. Also, see the example in the [Sample](./Sample/) folder.
 
-### Azure Container Registry build
+### GitHub Container Registry build
 
-If you want to make use of an Azure Container Registry then I would recommend to fork the project, and run the GitHub Actions. Or, run the [Bicep template](./Infra/main.bicep) for the ACR deployment locally and then push it using the same principal
+If you want to make use of GHCR then I would recommend to fork the project, and run the GitHub Actions (`Publish Extension` workflow publishes to `ghcr.io/<owner>/<repo>/extensions/azuredevops`). Or, publish it yourself after logging in with `docker login ghcr.io`:
 
 ```powershell
-[string] $target = "br:<registry-name>.azurecr.io/extensions/azuredevops:<version>"
+[string] $target = "br:ghcr.io/<owner>/<repo>/extensions/azuredevops:<version>"
 
 ./Infra/Scripts/Publish-Extension.ps1 -Target $target
 ```
 
-In the `bicepconfig.json` you refer to the ACR:
+In the `bicepconfig.json` you refer to GHCR, and you must enable the `ociEnabled` experimental feature (GHCR is not an ACR, so Bicep needs the generic OCI transport):
 
 ```json
 {
   "experimentalFeaturesEnabled": {
-    "localDeploy": true
+    "localDeploy": true,
+    "ociEnabled": true
   },
   "extensions": {
-    "azuredevops": "br:<registry-name>.azurecr.io/extensions/azuredevops:<version>" // ACR
+    "azuredevops": "br:ghcr.io/<owner>/<repo>/extensions/azuredevops:<version>" // GHCR
   },
   "implicitExtensions": []
 }
 ```
 
-## Public ACR
+## Public GHCR
 
-If you want to try it out without effort, then you can use `br:azuredevopsbicep.azurecr.io/extensions/azuredevops:0.1.39` as the ACR reference.
+If you want to try it out without effort, then you can use `br:ghcr.io/dylan-prins/azure-devops-bicep-local-deploy/extensions/azuredevops:<version>` as the GHCR reference (see the [packages page](https://github.com/Dylan-Prins/azure-devops-bicep-local-deploy/pkgs/container/azure-devops-bicep-local-deploy%2Fextensions%2Fazuredevops) for available versions). The package is public, so no authentication is required to pull it.
 
 ## Bicep Usage Example
 
