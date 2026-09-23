@@ -51,6 +51,14 @@ jobs:
           $env:BICEP_TRACING_ENABLED = "true"
           ./Infra/Scripts/Publish-Extension.ps1 -Target azure-devops-extension
 
+      - name: Upload Extension Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-devops-extension
+          path: azure-devops-extension
+          if-no-files-found: error
+          retention-days: 14
+
   run-extension-tests:
     name: Run Extension Tests
     runs-on: ubuntu-latest
